@@ -1,0 +1,2 @@
+module MeerkatsHelper
+end

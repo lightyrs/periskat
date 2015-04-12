@@ -1,0 +1,20 @@
+defaults: &defaults
+  adapter: postgresql
+  pool: 5
+  timeout: 5000
+
+test:
+  <<: *defaults
+  database: periskat-test
+  host: 127.0.0.1
+  min_messages: WARNING
+
+development:
+  <<: *defaults
+  database: periskat-development
+  host: 127.0.0.1
+
+production:
+  <<: *defaults
+  pool: 12
+  database: periskat-production

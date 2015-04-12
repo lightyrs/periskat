@@ -1,0 +1,2 @@
+class MeerkatsController < ApplicationController
+end
