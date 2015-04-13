@@ -39,7 +39,8 @@ class MeerkatPopulator
       status:           response["result"]["status"],
       end_time:         parse_end_time(response["result"]["endTime"]),
       twitter_tweet_id: "#{response['result']['tweetId']}",
-      playlist_url:     response["followupActions"].try(:[], "playlist")
+      playlist_url:     response["followupActions"].try(:[], "playlist"),
+      url:              meerkat_url(response["result"]["id"], response["result"]["broadcaster"])
     }
   end
 
@@ -59,6 +60,10 @@ class MeerkatPopulator
       followers_count:      response["result"]["stats"]["followersCount"],
       score:                response["result"]["stats"]["score"]
     }
+  end
+
+  def self.meerkat_url(broadcast_id, broadcaster)
+    "http://meerkatapp.co/#{broadcaster['name']}/#{broadcast_id}"
   end
 
   def self.parse_end_time(end_time)

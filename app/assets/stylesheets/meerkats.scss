@@ -1,3 +1,13 @@
-// Place all the styles related to the meerkats controller here.
-// They will automatically be included in application.css.
-// You can use Sass (SCSS) here: http://sass-lang.com/
+.meerkat {
+  float: left;
+  background-position: center center;
+  background-size: cover;
+  color: #FFF;
+  border: 5px solid #000;
+  border-radius: 0.6em;
+  position: relative;
+  background-color: #000;
+  width: 269px;
+  height: 454px;
+  margin: 20px;
+}

@@ -3,6 +3,7 @@ class CreateMeerkats < ActiveRecord::Migration
     create_table :meerkats do |t|
       t.string     :external_id, null: false
       t.string     :playlist_url
+      t.string     :url
       t.string     :place_name
       t.string     :location_string
       t.float      :latitude
