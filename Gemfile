@@ -14,6 +14,7 @@ gem 'sidekiq'
 gem 'protected_attributes'
 gem 'oj'
 gem 'oj_mimic_json'
+gem 'twitter'
 
 group :doc do
   gem 'sdoc', '~> 0.4.0'
