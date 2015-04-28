@@ -12,8 +12,15 @@ class TwitterClient
   def filter_stream
     @client.filter(track: "#Periscope") do |object|
       if object.is_a?(Twitter::Tweet) && object.text.match(/LIVE on #Periscope/i).present?
-        puts object.text.inspect.yellow
-        puts object.uris.inspect.green
+        puts object.inspect.red.underline
+        puts object.entities.inspect.light_red if object.entities?
+        puts object.hashtags.inspect.light_blue if object.hashtags?
+        puts object.user_mentions.inspect.red if object.user_mentions?
+        puts object.media.inspect.blue if object.media?
+        puts object.full_text.inspect.yellow
+        puts object.text.inspect.light_yellow
+        puts object.uri.inspect.green
+        puts object.uris.inspect.light_green
       end
     end
   end

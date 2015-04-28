@@ -13,4 +13,5 @@
 //= require jquery
 //= require jquery_ujs
 //= require mediaelement-and-player
+//= require periscope
 //= require_tree .
