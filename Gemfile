@@ -15,6 +15,7 @@ gem 'protected_attributes'
 gem 'oj'
 gem 'oj_mimic_json'
 gem 'twitter'
+gem 'redis'
 
 group :doc do
   gem 'sdoc', '~> 0.4.0'
