@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+ruby '2.2.2'
 
 gem 'rails', '4.2.1'
 gem 'pg'
@@ -14,8 +15,9 @@ gem 'sidekiq'
 gem 'protected_attributes'
 gem 'oj'
 gem 'oj_mimic_json'
+gem 'http'
 gem 'twitter'
-gem 'redis'
+gem 'redis-objects'
 
 group :doc do
   gem 'sdoc', '~> 0.4.0'
