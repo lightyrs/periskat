@@ -3,7 +3,9 @@ ruby '2.2.2'
 
 gem 'rails', '4.2.1'
 gem 'pg'
-gem "haml-rails", '~> 0.9'
+gem 'ohm'
+gem 'ohm-contrib'
+gem 'haml-rails', '~> 0.9'
 gem 'sass-rails', '~> 5.0'
 gem 'uglifier', '>= 1.3.0'
 gem 'coffee-rails', '~> 4.1.0'
@@ -17,7 +19,6 @@ gem 'oj'
 gem 'oj_mimic_json'
 gem 'http'
 gem 'twitter'
-gem 'redis-objects'
 
 group :doc do
   gem 'sdoc', '~> 0.4.0'
