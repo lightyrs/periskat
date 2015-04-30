@@ -1,6 +1,6 @@
 class PeriscopesController < ApplicationController
 
   def index
-    @periscopes = Periscope.order("created_at DESC").first(8)
+    @periscopes = Periscope.all.sort_by(:created_at, limit: [0,8], order: 'DESC')
   end
 end

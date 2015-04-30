@@ -1,0 +1,38 @@
+.mejs-container {
+  outline: none;
+
+  &:focus,
+  &:active {
+    outline: none !important;
+  }
+}
+
+.mejs-inner {
+  outline: none;
+
+  &:focus,
+  &:active {
+    outline: none !important;
+  }
+}
+
+.mejs-mediaelement {
+  outline: none;
+
+  &:focus,
+  &:active {
+    outline: none !important;
+  }
+}
+
+.me-plugin {
+  height: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+  outline: none;
+
+  &:focus,
+  &:active {
+    outline: none !important;
+  }
+}
