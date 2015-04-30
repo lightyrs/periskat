@@ -1,6 +1,6 @@
 class MeerkatPopulator
 
-  def self.fetch_and_persist!
+  def self.run
     response_hash = MeerkatClient.new.broadcasts
     persist_broadcasters(response_hash[:broadcasters])
     persist_broadcasts(response_hash[:broadcasts])
