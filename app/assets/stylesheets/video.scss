@@ -1,5 +1,13 @@
 .mejs-container {
+  background-color: #000;
+  background-position: center center;
+  background-size: cover;
+  border: 5px solid #000;
+  border-radius: 10px;
+  color: #FFF;
   outline: none;
+  overflow: hidden;
+  position: relative;
 
   &:focus,
   &:active {
