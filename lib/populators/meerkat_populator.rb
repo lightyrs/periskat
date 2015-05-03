@@ -11,12 +11,13 @@ class MeerkatPopulator
   def self.persist_broadcasts(broadcasts)
     broadcasts.each do |broadcast|
       record             = Meerkat.new(map_broadcast_response(broadcast))
-      record.broadcaster = Broadcaster.find_by(external_id: broadcast["result"]["broadcaster"]["id"])
-      record.save
+      record.broadcaster = Broadcaster.find_by(twitter_user_id: user_id_by_tweet_id(record.twitter_tweet_id))
+      record.save unless record.broadcaster.nil?
     end
   end
 
   def self.persist_broadcasters(broadcasters)
+    @broadcasters = broadcasters
     broadcasters.each do |broadcaster|
       Broadcaster.create(map_broadcaster_response(broadcaster))
     end
@@ -45,21 +46,24 @@ class MeerkatPopulator
   end
 
   def self.map_broadcaster_response(response)
+    response = response[:tweet_user]
     {
-      external_id:          response["result"]["info"]["id"],
-      username:             response["result"]["info"]["username"],
-      display_name:         response["result"]["info"]["displayName"],
-      avatar_url:           response["followupActions"]["profileImage"],
-      avatar_thumbnail_url: response["followupActions"]["profileThumbImage"],
-      profile_url:          nil,
-      twitter_user_id:      response["result"]["info"]["twitterId"],
-      privacy:              response["result"]["info"]["privacy"],
-      bio:                  response["result"]["info"]["bio"],
-      streams_count:        response["result"]["stats"]["streamsCount"],
-      following_count:      response["result"]["stats"]["followingCount"],
-      followers_count:      response["result"]["stats"]["followersCount"],
-      score:                response["result"]["stats"]["score"]
+      twitter_user_id: response.id,
+      twitter_user_name: response.name,
+      twitter_user_screen_name: response.screen_name,
+      twitter_user_avatar: "#{response.profile_image_uri}",
+      twitter_user_banner_url: "#{response.profile_banner_uri}",
+      twitter_user_profile_url: "#{response.uri}",
+      twitter_user_bio: response.description,
+      twitter_user_following_count: response.friends_count,
+      twitter_user_followers_count: response.followers_count,
+      twitter_user_location: response.location
     }
+  end
+
+  def self.user_id_by_tweet_id(tweet_id)
+    b = @broadcasters.detect { |broadcaster| "#{broadcaster[:tweet_id]}" == "#{tweet_id}" }
+    "#{b[:tweet_user].id}" rescue ''
   end
 
   def self.meerkat_url(broadcast_id, broadcaster)

@@ -12,3 +12,4 @@
 !/log/.keep
 /tmp
 dump.rdb
+/config/twitter.yml

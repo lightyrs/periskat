@@ -2,13 +2,8 @@ require 'http'
 
 class TwitterClient
 
-  def initialize
-    @client = Twitter::Streaming::Client.new do |config|
-      config.consumer_key        = "lOS9lsS7xOwW0p5tVK7uNN24o"
-      config.consumer_secret     = "kK8pYW13qzQJyMrjMq41HNiJKkALg2SVJUsPtPWJqupPhoDjLX"
-      config.access_token        = "14280068-0hWXYBe3qnlPiAKNls9VG9LOLQrC3ldGPxLsBHWaX"
-      config.access_token_secret = "AjbTOqu1u8lNbgl9ZshyUjWGZS0rlPeQ1csBQEl1CzAG2"
-    end
+  def initialize(api = :rest)
+    @client = api == :rest ? rest_client : streaming_client
   end
 
   def filter_stream
@@ -16,6 +11,30 @@ class TwitterClient
       if object.is_a?(Twitter::Tweet) && object.text.match(/LIVE on #Periscope/i).present?
         yield(object)
       end
+    end
+  end
+
+  def tweets(tweet_ids)
+    @client.statuses(tweet_ids)
+  end
+
+  private
+
+  def streaming_client
+    Twitter::Streaming::Client.new do |config|
+      config.consumer_key        = TWITTER_CONSUMER_KEY
+      config.consumer_secret     = TWITTER_CONSUMER_SECRET
+      config.access_token        = TWITTER_ACCESS_TOKEN
+      config.access_token_secret = TWITTER_ACCESS_TOKEN_SECRET
+    end
+  end
+
+  def rest_client
+    Twitter::REST::Client.new do |config|
+      config.consumer_key        = TWITTER_CONSUMER_KEY
+      config.consumer_secret     = TWITTER_CONSUMER_SECRET
+      config.access_token        = TWITTER_ACCESS_TOKEN
+      config.access_token_secret = TWITTER_ACCESS_TOKEN_SECRET
     end
   end
 end

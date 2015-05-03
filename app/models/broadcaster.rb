@@ -1,11 +1,11 @@
 class Broadcaster < ActiveRecord::Base
 
-  attr_accessible :external_id, :username, :display_name, :avatar_url,
-                  :avatar_thumbnail_url, :profile_url, :twitter_user_id,
-                  :privacy, :bio, :streams_count, :following_count,
-                  :followers_count, :score
+  attr_accessible :twitter_user_id, :twitter_user_name, :twitter_user_screen_name,
+                  :twitter_user_avatar, :twitter_user_profile_url, :twitter_user_bio,
+                  :twitter_user_following_count, :twitter_user_followers_count,
+                  :twitter_user_location, :twitter_user_banner_url
 
-  validates :external_id, presence: true, uniqueness: true
+  validates :twitter_user_id, presence: true, uniqueness: true
 
   has_many :meerkats
 end

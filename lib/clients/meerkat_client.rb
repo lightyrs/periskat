@@ -14,8 +14,7 @@ class MeerkatClient
     end
     @hydra.queue(request)
     @hydra.run
-    broadcasters(@broadcasts.map { |broadcast| broadcast["result"]["broadcaster"]["id"] })
-    { broadcasts: @broadcasts, broadcasters: @broadcasters }
+    { broadcasts: @broadcasts, broadcasters: broadcasters_from_tweets }
   end
 
   def broadcast(broadcast_id)
@@ -40,6 +39,14 @@ class MeerkatClient
     end
     @hydra.run
     @broadcasters
+  end
+
+  def broadcasters_from_tweets
+    @twitter_client = TwitterClient.new(:rest)
+    tweets = @twitter_client.tweets(@broadcasts.map { |broadcast| broadcast["result"]["tweetId"] })
+    tweets.map do |tweet|
+      { tweet_id: tweet.id, tweet_user: tweet.user }
+    end
   end
 
   def broadcaster(broadcaster_id)
