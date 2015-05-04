@@ -11,52 +11,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150411231117) do
+ActiveRecord::Schema.define(version: 0) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-
-  create_table "broadcasters", force: :cascade do |t|
-    t.string   "twitter_user_id",              null: false
-    t.string   "twitter_user_name"
-    t.string   "twitter_user_screen_name"
-    t.string   "twitter_user_avatar"
-    t.string   "twitter_user_profile_url"
-    t.string   "twitter_user_banner_url"
-    t.integer  "twitter_user_followers_count"
-    t.integer  "twitter_user_following_count"
-    t.string   "twitter_user_location"
-    t.text     "twitter_user_bio"
-    t.datetime "created_at",                   null: false
-    t.datetime "updated_at",                   null: false
-  end
-
-  add_index "broadcasters", ["twitter_user_id"], name: "index_broadcasters_on_twitter_user_id", unique: true, using: :btree
-
-  create_table "meerkats", force: :cascade do |t|
-    t.string   "external_id",                   null: false
-    t.string   "playlist_url"
-    t.string   "url"
-    t.string   "place_name"
-    t.string   "location_string"
-    t.float    "latitude"
-    t.float    "longitude"
-    t.text     "cover_images",     default: [],              array: true
-    t.string   "cover"
-    t.integer  "likes_count"
-    t.integer  "comments_count"
-    t.integer  "restreams_count"
-    t.integer  "watchers_count"
-    t.datetime "end_time"
-    t.text     "caption"
-    t.string   "status"
-    t.string   "twitter_tweet_id"
-    t.integer  "broadcaster_id"
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
-  end
-
-  add_index "meerkats", ["broadcaster_id"], name: "index_meerkats_on_broadcaster_id", using: :btree
-  add_index "meerkats", ["external_id"], name: "index_meerkats_on_external_id", unique: true, using: :btree
 
 end

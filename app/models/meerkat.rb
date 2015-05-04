@@ -1,11 +1,26 @@
-class Meerkat < ActiveRecord::Base
+class Meerkat < Ohm::Model
+  include Ohm::Timestamps
 
-  attr_accessible :external_id, :playlist_url, :place_name, :location_string,
-                  :latitude, :longitude, :cover_images, :cover, :likes_count,
-                  :comments_count, :restreams_count, :watchers_count, :end_time,
-                  :caption, :status, :twitter_tweet_id, :url
+  attribute :url
+  unique    :url
 
-  validates :external_id, presence: true, uniqueness: true
+  attribute :external_id
+  attribute :playlist_url
+  attribute :place
+  attribute :location
+  attribute :cover
+  attribute :cover_images
+  attribute :likes_count
+  attribute :comments_count
+  attribute :restreams_count
+  attribute :watchers_count
+  attribute :end_time
+  attribute :caption
+  attribute :status
+  attribute :twitter_tweet_id
+  attribute :twitter_tweet_text
+  attribute :twitter_tweet_url
+  attribute :twitter_tweet_source
 
-  belongs_to :broadcaster
+  reference :broadcaster, :Broadcaster
 end

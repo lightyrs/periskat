@@ -7,10 +7,8 @@ class TwitterClient
   end
 
   def filter_stream
-    @client.filter(track: "#Periscope") do |object|
-      if object.is_a?(Twitter::Tweet) && object.text.match(/LIVE on #Periscope/i).present?
-        yield(object)
-      end
+    @client.filter(track: "#Periscope, #meerkat") do |object|
+      yield(object)
     end
   end
 

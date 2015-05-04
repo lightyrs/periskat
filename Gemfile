@@ -19,6 +19,7 @@ gem 'oj'
 gem 'oj_mimic_json'
 gem 'http'
 gem 'twitter'
+gem 'unshorten'
 
 group :doc do
   gem 'sdoc', '~> 0.4.0'

@@ -1,44 +1,50 @@
 class PeriscopePopulator
 
-  def self.run
-    instance = new
-    instance.populate_from_stream!
-  end
-
-  def initialize
-    @client = TwitterClient.new
-  end
-
-  def populate_from_stream!
-    @client.filter_stream { |tweet| parse_and_persist(tweet) }
-  end
-
-  private
-
   def parse_and_persist(tweet)
-    periscope = Periscope.new
+    broadcaster = find_or_create_broadcaster(tweet)
+    periscope   = Periscope.new
 
-    periscope.url                      = pluck_periscope_url(tweet.uris)
-    periscope.twitter_tweet_id         = tweet.id
-    periscope.twitter_tweet_text       = tweet.text
-    periscope.twitter_tweet_url        = "#{tweet.uri}"
-    periscope.twitter_tweet_source     = tweet.source
-    periscope.twitter_user_id          = tweet.user.id
-    periscope.twitter_user_name        = tweet.user.name
-    periscope.twitter_user_screen_name = tweet.user.screen_name
-    periscope.twitter_user_avatar      = "#{tweet.user.profile_image_uri}"
-    periscope.twitter_user_profile_url = "#{tweet.user.uri}"
-    periscope.twitter_user_bio         = "#{tweet.user.description}"
+    periscope.url                  = pluck_periscope_url(tweet.uris)
+    periscope.twitter_tweet_id     = tweet.id
+    periscope.twitter_tweet_text   = tweet.text
+    periscope.twitter_tweet_url    = "#{tweet.uri}"
+    periscope.twitter_tweet_source = tweet.source
 
-    playlist_urls                 = scrape_playlist_urls(periscope.url)
-    periscope.playlist_url        = playlist_urls[:http]
-    periscope.secure_playlist_url = playlist_urls[:https]
+    playlist_urls                  = scrape_playlist_urls(periscope.url)
+    periscope.playlist_url         = playlist_urls[:http]
+    periscope.secure_playlist_url  = playlist_urls[:https]
+    periscope.broadcaster_id       = broadcaster.id
 
     puts periscope.url.inspect.green
 
     periscope.save
   rescue => e
     puts "#{e.class} #{e.message}".inspect.red
+  end
+
+  private
+
+  def find_or_create_broadcaster(tweet)
+    broadcaster = Broadcaster.find(twitter_user_id: "#{tweet.user.id}")
+
+    if broadcaster.any?
+      return broadcaster.to_a.pop
+    else
+      broadcaster = Broadcaster.new
+    end
+
+    broadcaster.twitter_user_id              = "#{tweet.user.id}"
+    broadcaster.twitter_user_name            = tweet.user.name
+    broadcaster.twitter_user_screen_name     = tweet.user.screen_name
+    broadcaster.twitter_user_avatar          = "#{tweet.user.profile_image_uri}"
+    broadcaster.twitter_user_banner_url      = "#{tweet.user.profile_banner_uri}"
+    broadcaster.twitter_user_profile_url     = "#{tweet.user.uri}"
+    broadcaster.twitter_user_bio             = tweet.user.description
+    broadcaster.twitter_user_following_count = tweet.user.friends_count
+    broadcaster.twitter_user_followers_count = tweet.user.followers_count
+    broadcaster.twitter_user_location        = tweet.user.location
+
+    return broadcaster if broadcaster.save
   end
 
   def pluck_periscope_url(uris)

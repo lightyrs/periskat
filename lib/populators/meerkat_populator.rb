@@ -1,76 +1,91 @@
 class MeerkatPopulator
 
-  def self.run
-    response_hash = MeerkatClient.new.broadcasts
-    persist_broadcasters(response_hash[:broadcasters])
-    persist_broadcasts(response_hash[:broadcasts])
+  def parse_and_persist(tweet)
+    expanded_url = expand_mrktv_url(tweet.uris)
+    return unless expanded_url.present? && expanded_url != "http://"
+
+    resource = resource_from_url(expanded_url)
+    return if resource["error"].present?
+
+    broadcaster  = find_or_create_broadcaster(tweet, resource)
+    meerkat      = Meerkat.new
+
+    meerkat.external_id          = resource["result"]["id"]
+    meerkat.playlist_url         = resource["followupActions"].try(:[], "playlist")
+    meerkat.place                = resource["result"]["place"]
+    meerkat.location             = resource["result"]["location"]
+    meerkat.cover_images         = resource["result"]["coverImages"] || []
+    meerkat.cover                = resource["result"]["cover"]
+    meerkat.likes_count          = resource["result"]["likesCount"]
+    meerkat.comments_count       = resource["result"]["commentsCount"]
+    meerkat.restreams_count      = resource["result"]["restreamsCount"]
+    meerkat.watchers_count       = resource["result"]["watchersCount"]
+    meerkat.end_time             = parse_end_time(resource["result"]["endTime"])
+    meerkat.caption              = resource["result"]["caption"]
+    meerkat.status               = resource["result"]["status"]
+    meerkat.twitter_tweet_id     = resource["result"]["tweetId"]
+    meerkat.twitter_tweet_text   = tweet.text
+    meerkat.twitter_tweet_url    = "#{tweet.uri}"
+    meerkat.twitter_tweet_source = tweet.source
+    meerkat.url                  = expanded_url
+    meerkat.broadcaster_id       = broadcaster.id
+
+    meerkat.save
+  rescue => e
+    puts "#{e.class} #{e.message}".inspect.red
   end
 
   private
 
-  def self.persist_broadcasts(broadcasts)
-    broadcasts.each do |broadcast|
-      record             = Meerkat.new(map_broadcast_response(broadcast))
-      record.broadcaster = Broadcaster.find_by(twitter_user_id: user_id_by_tweet_id(record.twitter_tweet_id))
-      record.save unless record.broadcaster.nil?
+  def find_or_create_broadcaster(tweet, resource)
+    broadcaster = Broadcaster.find(twitter_user_id: "#{tweet.user.id}")
+
+    if broadcaster.any?
+      return broadcaster.to_a.pop
+    else
+      broadcaster = Broadcaster.new
     end
+
+    broadcaster.twitter_user_id              = "#{tweet.user.id}"
+    broadcaster.twitter_user_name            = tweet.user.name
+    broadcaster.twitter_user_screen_name     = tweet.user.screen_name
+    broadcaster.twitter_user_avatar          = "#{tweet.user.profile_image_uri}"
+    broadcaster.twitter_user_banner_url      = "#{tweet.user.profile_banner_uri}"
+    broadcaster.twitter_user_profile_url     = "#{tweet.user.uri}"
+    broadcaster.twitter_user_bio             = tweet.user.description
+    broadcaster.twitter_user_following_count = tweet.user.friends_count
+    broadcaster.twitter_user_followers_count = tweet.user.followers_count
+    broadcaster.twitter_user_location        = tweet.user.location
+    broadcaster.meerkat_user_id              = resource["result"]["broadcaster"]["id"]
+    broadcaster.meerkat_user_profile_url     = resource["result"]["broadcaster"]["profile"]
+
+    return broadcaster if broadcaster.save
   end
 
-  def self.persist_broadcasters(broadcasters)
-    @broadcasters = broadcasters
-    broadcasters.each do |broadcaster|
-      Broadcaster.create(map_broadcaster_response(broadcaster))
-    end
+  def expand_mrktv_url(urls)
+    Unshorten[pluck_meerkat_url(urls)]
   end
 
-  def self.map_broadcast_response(response)
-    {
-      external_id:      response["result"]["id"],
-      cover:            response["result"]["cover"],
-      caption:          response["result"]["caption"],
-      latitude:         nil,
-      longitude:        nil,
-      location_string:  response["result"]["location"],
-      place_name:       response["result"]["place"],
-      watchers_count:   response["result"]["watchersCount"],
-      comments_count:   response["result"]["commentsCount"],
-      likes_count:      response["result"]["likesCount"],
-      restreams_count:  response["result"]["restreamsCount"],
-      cover_images:     (response["result"]["coverImages"] || []),
-      status:           response["result"]["status"],
-      end_time:         parse_end_time(response["result"]["endTime"]),
-      twitter_tweet_id: "#{response['result']['tweetId']}",
-      playlist_url:     response["followupActions"].try(:[], "playlist"),
-      url:              meerkat_url(response["result"]["id"], response["result"]["broadcaster"])
-    }
+  def resource_from_url(url)
+    puts url.inspect.yellow
+    resource_id = url.match(/.*\/(.*)\?/)[1]
+    body        = HTTP.get(meerkat_resource_url(resource_id)).body.to_s
+
+    Oj.load(body)
+  rescue => e
+    puts "#{e.class} #{e.message}".inspect.red
   end
 
-  def self.map_broadcaster_response(response)
-    response = response[:tweet_user]
-    {
-      twitter_user_id: response.id,
-      twitter_user_name: response.name,
-      twitter_user_screen_name: response.screen_name,
-      twitter_user_avatar: "#{response.profile_image_uri}",
-      twitter_user_banner_url: "#{response.profile_banner_uri}",
-      twitter_user_profile_url: "#{response.uri}",
-      twitter_user_bio: response.description,
-      twitter_user_following_count: response.friends_count,
-      twitter_user_followers_count: response.followers_count,
-      twitter_user_location: response.location
-    }
+  def pluck_meerkat_url(uris)
+    meerkat_url = uris.detect { |uri| uri.expanded_url.to_s.match(/mrk\.tv/) }
+    meerkat_url.present? ? meerkat_url.expanded_url.to_s : ''
   end
 
-  def self.user_id_by_tweet_id(tweet_id)
-    b = @broadcasters.detect { |broadcaster| "#{broadcaster[:tweet_id]}" == "#{tweet_id}" }
-    "#{b[:tweet_user].id}" rescue ''
-  end
-
-  def self.meerkat_url(broadcast_id, broadcaster)
-    "http://meerkatapp.co/#{broadcaster['name']}/#{broadcast_id}"
-  end
-
-  def self.parse_end_time(end_time)
+  def parse_end_time(end_time)
     end_time > 0 ? Time.at(end_time) : nil
+  end
+
+  def meerkat_resource_url(resource_id)
+    "http://resources.meerkatapp.co/broadcasts/#{resource_id}/summary"
   end
 end
