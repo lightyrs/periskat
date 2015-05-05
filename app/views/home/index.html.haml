@@ -1,7 +1,9 @@
 %h1 Periskat
 
 .clearfix.mxn2
-  = render partial: 'periscopes/periscope', collection: @periscopes
-
-.clearfix.mxn2
-  = render partial: 'meerkats/meerkat', collection: @meerkats
+  - @periscopes.in_groups_of(4) do |periscopes|
+    = render partial: 'periscopes/periscope', collection: periscopes
+    .clearfix
+  - @meerkats.in_groups_of(4) do |meerkats|
+    = render partial: 'meerkats/meerkat', collection: meerkats
+    .clearfix
